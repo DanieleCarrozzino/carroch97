@@ -66,13 +66,77 @@ I will not explain too much the hardware part also because it is not my field an
   
   <h4>Aplication part</h4>
   
-  ```
-  TODO
-  Insert Best code
+  The challenge of the application was to integrate a communication via bluetooth BLE and to be able to communicate with the hardware part of the project. the project is written in <b>kotlin</b> and <b>java</b>, a relatively simple project in terms of architecture because it works in offline mode and is not supported by any server.
+  
+  This is a simple examples of my methods to write and read on the bluetooth module.
   
   ```
   
-  and link to the code... [My personal code DanieleProject Msauce Project](https://github.com/msauceproject)
+  private static final String STRING_UUID = "0000ffe0-0000-1000-8000-00805f9b34fb";
+  
+  /**
+    * <p>Send data</p>
+    * @apiNote
+    * This method is for writing the data on the bluetooth module.
+    * @params value The value that I want write on the module
+    */
+  public void sendData(String value) {
+        {
+            if(mBluetoothGatt == null || mBluetoothGatt.getServices().size() == 0){
+                Toast.makeText(stateManager.mainActivity, "Connecting...", Toast.LENGTH_SHORT).show();
+                return;
+            }
+            if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+                Log.w(TAG, "BluetoothAdapter not initialized");
+                return;
+            }
+            /*check if the service is available on the device*/
+            BluetoothGattService mCustomService = mBluetoothGatt.getService(UUID.fromString(STRING_UUID));
+
+            if (mCustomService == null) {
+                Log.w(TAG, "Custom BLE Service not found");
+                return;
+            }
+            /*Get the read characteristic from the service*/
+            BluetoothGattCharacteristic mWriteCharacteristic = mCustomService.getCharacteristic(UUID.fromString(STRING_UUID));
+            Log.e(TAG, "Write on BLE " + value);
+            mBluetoothGatt.setCharacteristicNotification(mWriteCharacteristic, true);
+            mWriteCharacteristic.setValue(value);
+            if (!mBluetoothGatt.writeCharacteristic(mWriteCharacteristic)) {
+                Log.w(TAG, "Failed to write characteristic");
+            }
+        }
+    }
+
+    /**
+    * <p>Receive data</p>
+    * @apiNote
+    * this method is for reading the data of the bluetooth module.
+    * No params need.
+    */
+    public void receivedata() {
+        {
+            if (mBluetoothAdapter == null || mBluetoothGatt == null) {
+                Log.w(TAG, "BluetoothAdapter not initialized");
+                return;
+            }
+            /*check if the service is available on the device*/
+            BluetoothGattService mCustomService = mBluetoothGatt.getService(UUID.fromString(STRING_UUID));
+            if (mCustomService == null) {
+                Log.w(TAG, "Custom BLE Service not found");
+                return;
+            }
+
+            BluetoothGattCharacteristic mReadCharacteristic = mCustomService.getCharacteristic(UUID.fromString(STRING_UUID));
+            mBluetoothGatt.setCharacteristicNotification(mReadCharacteristic, true);
+            Log.e("SERVICE", "READ");
+            if (!mBluetoothGatt.readCharacteristic(mReadCharacteristic)) {
+                Log.w(TAG, "Failed to read characteristic");
+            }
+        }
+    }
+  
+  ```
 
 <h2>Second project - Scraper</h2>
 
