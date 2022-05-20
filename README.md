@@ -141,6 +141,13 @@ I will not explain too much the hardware part also because it is not my field an
 <h2>Second project - Scraper</h2>
 
 Born as a web scraper to get information on the covid in a single application, it has evolved as a notification manager.
+Elements of interest of the project:
+- Integration with Firebase
+- NotificationListener
+- Scraper online
+
+<h3>Firebase</h3>
+Collection
 
 <p>
 <img src="https://user-images.githubusercontent.com/51740054/169076121-59b75152-1df7-4441-9dce-2f41be826adc.jpg" width="158.8" height="307.2" title="WET">
