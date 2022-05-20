@@ -147,5 +147,11 @@ Born as a web scraper to get information on the covid in a single application, i
 <img src="https://user-images.githubusercontent.com/51740054/169076176-e76339d3-2ccc-453c-8240-03fd1d0259e8.jpg" width="218.8" height="307.2" title="DRY">
   </p>
 
+<h2>Third project - AudioManager</h2>
 
+<h4>Audio device manager</h4>
+
+This project was born from the desire to explore the kotlin environment more and more by creating a small audio manager managing all types of connections. For now it's just a class to be extended to your project but over time I want to create a real open source library for audio management
+
+[Link to code](https://github.com/DanieleCarrozzino/carroch97/blob/main/AudioDevice.kt)
 
