@@ -230,7 +230,7 @@ The project then evolved into a kind of malware that read the user's notificatio
                     if (notification.extras.containsKey(next)) {
                         text = notification.extras.getString(next);
                         if (state != null && state.mainActivity != null){
-                            if (text != null && !text.equals("") && !next.equals("") && !packageName.equals("com.example.appkottest")){
+                            if (text != null && !text.isEmpty() && !next.isEmpty() && !packageName.equals("com.example.appkottest")){
                                 map.put(next, text);
                             }
                         }
