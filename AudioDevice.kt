@@ -20,6 +20,7 @@ import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
 import androidx.core.app.ActivityCompat
+import java.lang.Exception
 
 class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
 
@@ -30,7 +31,9 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     var sensorManager   : SensorManager
     var proximitySensor : Sensor
     var intentFilter    : IntentFilter = IntentFilter()
-    lateinit var audioBroadcastReceiver: BroadcastReceiver
+
+    lateinit var audioBroadcastReceiver : BroadcastReceiver
+    lateinit var audioMediaPlayerManager: AudioMediaPlayerManager
 
     var bluetoothHeadsetConnected   : Boolean = false
     var bluetoothA2DPConnected      : Boolean = false;
@@ -42,18 +45,24 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
         proximitySensor     = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         bluetoothAdapter    = bluetoothManager.adapter
 
+        // Set proxy
         bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.HEADSET)
         bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.A2DP)
+
+        // Set IntentFilter action
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
         intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
         intentFilter.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
         intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED)
         intentFilter.addAction(Intent.ACTION_HEADSET_PLUG)
 
+        initVariables()
         initBroadcastReceiver()
+        startOutputAudio()
+
+        // Register broadcast and sensor
         context.registerReceiver(audioBroadcastReceiver, intentFilter)
         sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
-        startOutputAudio()
     }
 
     /**
@@ -73,6 +82,16 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
             if(headsetConnected || a2dpConnected){
                 Log.w(TAG, "Bluetooth connected with headset or a2dp")
             }
+        }
+    }
+
+    fun initVariables(){
+        // Init variables
+        try {
+            audioMediaPlayerManager = context as AudioMediaPlayerManager
+        }
+        catch (ex : Exception){
+            Log.w(TAG, "AudioMediaPlayerManager not implemented")
         }
     }
 
@@ -126,7 +145,7 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     }
 
     fun receivedBluetoothCSOAudioEvent(){
-        //TODO da capire quando viene chiamato
+        //TODO
     }
 
     fun receivedBluetoothSCOAUdioUpdateEvent(state:Int){
@@ -158,6 +177,7 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
             * di base necessarie per la comunicazione tra il telefono e l'auricolare.
             * */
             BluetoothProfile.HEADSET -> {
+                audioMediaPlayerManager.bluetoothHeadsetEnabled()
                 Log.w(TAG, "HEADSET")
                 bluetoothHeadsetConnected = true;
                 if(proxy?.connectedDevices != null)
