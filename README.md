@@ -265,7 +265,22 @@ Elements of interest of the project:
 - Retrofit
 - Room
 - Live Data
+- DAO
 
+<h3>Retrofit</h3>
+If you need to build a client for a REST API in kotlin, look no further than Retrofit. It's a Java library also compatible with Android, and works smoothly with Kotlin.
+
+<h3>DAO</h3>
+
+Data Access Objects are the main classes where you define your database interactions. They can include a variety of query methods.
+
+The class marked with @Dao should either be an interface or an abstract class. At compile time, Room will generate an implementation of this class when it is referenced by a Database.
+[Google Doc](https://developer.android.com/reference/kotlin/androidx/room/Dao)
+
+```
+@Insert(onConflict = OnConflictStrategy.REPLACE)
+    suspend fun addUser(user: User)
+```
 
 <h2>Reference texts</h2>
 Kotlin in action mannin edition 2017
