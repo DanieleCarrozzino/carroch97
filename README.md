@@ -267,11 +267,95 @@ Elements of interest of the project:
 - Live Data
 - DAO
 
+<h3>Firebase</h3>
+Firebase is a powerful platform for your mobile and web application. Firebase can power your app’s backend, including data storage, user authentication, static hosting, and more. With Firebase, you can easily build mobile and web apps that scale from one user to one million.
+
+I used Firebase to integrate push notification and store images.
+
+<h3>MVVM</h3>
+Model-View-ViewModel (MVVM) is a software design pattern that is structured to separate program logic and user interface controls.
+Each fragment and activity have their associated ViewModel.
+
 <h3>Retrofit</h3>
 If you need to build a client for a REST API in kotlin, look no further than Retrofit. It's a Java library also compatible with Android, and works smoothly with Kotlin.
 
-<h3>DAO</h3>
+```
+fun sync(){
+        val routineAPI:RoutineAPI = retrofit.create(RoutineAPI::class.java)
+        val call:Call<List<RetrofitIdVersion>> = routineAPI.sync()
 
+        GlobalScope.launch(Dispatchers.IO) {
+            var list:List<RetrofitIdVersion>? = null
+            try{
+                list = call.execute().body()
+            }
+            catch (e:Exception){
+                Log.e("Daniele Back Call", "CATCH " + e.message)
+            }
+            finally {
+                if(list != null) {
+                    state.arraySyncResult = ArrayList(list)
+                }
+            }
+        }
+    }
+```
+
+<h3>Room</h3>
+Room is a part of the Android Architecture components which provides an abstraction layer over SQlite which allows for a more robust database acces while still providing the full power of SQlite.
+
+@Entity(tableName = "master_routine_table")
+class MasterRoutine(
+    @PrimaryKey(autoGenerate = false)
+    var id_master:String,
+    var id_from_db:Int,
+    var versionId:Int = -1,
+    var title:String,
+    var description:String,
+    @SerializedName("category")
+    var category:String,
+    var preference:Boolean = false,
+    @SerializedName("owner")
+    var userOwner:String,
+    var public_routine:Int,
+    var level:Int = 1,
+    var image:String,
+    var personalRoutine:Boolean = false,
+    var goal:String = ""
+) {
+
+    @Ignore
+    var bitmapImage: Bitmap? = null
+
+    @Ignore
+    var target: Target? = null
+
+    @JvmName("getTarget1")
+    fun getTarget() : Target?{
+        target  = object : Target {
+            override fun onBitmapLoaded(bitmap: Bitmap?, from: Picasso.LoadedFrom?) {
+                Log.e("SUCCESS", "save bitmap")
+                bitmapImage = bitmap
+            }
+            override fun onBitmapFailed(e: java.lang.Exception?, errorDrawable: Drawable?) {}
+            override fun onPrepareLoad(placeHolderDrawable: Drawable?) {}
+        }
+        return target
+    }
+
+    fun getBitmapImageRoutine() : Bitmap? {
+        return if(bitmapImage != null)
+            bitmapImage
+        else
+            null
+    }
+}
+
+<h3>LiveData</h3>
+LiveData is an observable data holder class. Unlike a regular observable, LiveData is lifecycle-aware, meaning it respects the lifecycle of other app components, such as activities, fragments, or services. This awareness ensures LiveData only updates app component observers that are in an active lifecycle state.
+[Google doc](https://developer.android.com/topic/libraries/architecture/livedata)
+
+<h3>DAO</h3>
 Data Access Objects are the main classes where you define your database interactions. They can include a variety of query methods.
 
 The class marked with @Dao should either be an interface or an abstract class. At compile time, Room will generate an implementation of this class when it is referenced by a Database.
