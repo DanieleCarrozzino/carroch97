@@ -259,6 +259,9 @@ This project was born from the desire to explore the kotlin environment more and
 
 <h2>Fourth project - Dyno</h4>
 
+<h3>Description</h3>
+The project is a social network where you can share or follow other people's daily routines. A workout in the gym, a study method, anything that can be considered a daily routine
+
 Elements of interest of the project:
 - Integration with Firebase
 - MVVM pattern software architectural pattern
@@ -353,18 +356,34 @@ class MasterRoutine(
 
 <h3>LiveData</h3>
 LiveData is an observable data holder class. Unlike a regular observable, LiveData is lifecycle-aware, meaning it respects the lifecycle of other app components, such as activities, fragments, or services. This awareness ensures LiveData only updates app component observers that are in an active lifecycle state.
-[Google doc](https://developer.android.com/topic/libraries/architecture/livedata)
+[Google Documentation](https://developer.android.com/topic/libraries/architecture/livedata)
+
+```
+@Query("SELECT * FROM single_routine_table ORDER BY id_master")
+    fun readAllSingleRoutine() : LiveData<List<SingleRoutineEntity>>
+```
+
+```
+val readAllData :LiveData<List<SingleRoutineEntity>> = routineDao.readAllSingleRoutine()
+```
 
 <h3>DAO</h3>
 Data Access Objects are the main classes where you define your database interactions. They can include a variety of query methods.
 
 The class marked with @Dao should either be an interface or an abstract class. At compile time, Room will generate an implementation of this class when it is referenced by a Database.
-[Google Doc](https://developer.android.com/reference/kotlin/androidx/room/Dao)
+[Google Documentation](https://developer.android.com/reference/kotlin/androidx/room/Dao)
 
 ```
 @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun addUser(user: User)
 ```
+
+<p>
+<img src="https://user-images.githubusercontent.com/51740054/169660286-bd2e2986-158a-42b1-b477-b8c6695d8713.jpg" width="158.8" height="307.2" title="Single routine">
+<img src="https://user-images.githubusercontent.com/51740054/169660290-3e1a8303-b2e5-4170-a716-5b367c88eab5.jpg" width="158.8" height="307.2" title="Main page">
+<img src="https://user-images.githubusercontent.com/51740054/169660292-fe52e6d4-4f2e-47fe-91ff-22d0c68c31f3.jpg" width="158.8" height="307.2" title="Profile">
+</p>
+
 
 <h2>Reference texts</h2>
 Kotlin in action mannin edition 2017
