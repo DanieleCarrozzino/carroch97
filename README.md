@@ -14,6 +14,8 @@ Along with my professional career, I developed some personal projects (of questi
 
 During my career, I mostly worked in an Android stack: indeed, the programming languages I know the most are <b>Java, Kotlin and C++</b>. Moreover, I am very used to markup languages like <b>XML</b> and data formats like JSON.
 
+[Curriculum Vitae](https://github.com/DanieleCarrozzino/carroch97/files/8747952/CV.pdf)
+
 <h1>Personal project</h1>
 
 <h2>First project - Sprinkler!</h2>
