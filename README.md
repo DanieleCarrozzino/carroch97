@@ -190,6 +190,7 @@ fun sync(){
 <h3>Room</h3>
 Room is a part of the Android Architecture components which provides an abstraction layer over SQlite which allows for a more robust database acces while still providing the full power of SQlite.
 
+```
 @Entity(tableName = "master_routine_table")
 class MasterRoutine(
     @PrimaryKey(autoGenerate = false)
@@ -236,6 +237,7 @@ class MasterRoutine(
             null
     }
 }
+```
 
 <h3>LiveData</h3>
 LiveData is an observable data holder class. Unlike a regular observable, LiveData is lifecycle-aware, meaning it respects the lifecycle of other app components, such as activities, fragments, or services. This awareness ensures LiveData only updates app component observers that are in an active lifecycle state.
