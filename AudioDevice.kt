@@ -1,4 +1,4 @@
-package it.feedbackitalia.easymeetingclientS;
+package daniele.carrozzino.premium;
 
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
