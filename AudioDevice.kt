@@ -1,6 +1,5 @@
-package com.android.myapplication
+package it.feedbackitalia.easymeetingclientS;
 
-import android.Manifest
 import android.bluetooth.BluetoothAdapter
 import android.bluetooth.BluetoothHeadset
 import android.bluetooth.BluetoothManager
@@ -10,7 +9,6 @@ import android.content.BroadcastReceiver
 import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
-import android.content.pm.PackageManager
 import android.hardware.Sensor
 import android.hardware.SensorEvent
 import android.hardware.SensorEventListener
@@ -19,13 +17,10 @@ import android.media.AudioManager
 import android.telephony.TelephonyManager
 import android.util.Log
 import android.widget.Toast
-import androidx.core.app.ActivityCompat
-import java.lang.Exception
 
-class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
+class AudioDeviceOnCall(var context : Context, var audioMediaPlayerManager: AudioMediaPlayerManager) : ServiceListener, SensorEventListener {
 
     val TAG = "AudioDevice"
-    var audioManager    : AudioManager
     var bluetoothAdapter: BluetoothAdapter
     var bluetoothManager: BluetoothManager
     var sensorManager   : SensorManager
@@ -33,36 +28,36 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     var intentFilter    : IntentFilter = IntentFilter()
 
     lateinit var audioBroadcastReceiver : BroadcastReceiver
-    lateinit var audioMediaPlayerManager: AudioMediaPlayerManager
 
-    var bluetoothHeadsetConnected   : Boolean = false
-    var bluetoothA2DPConnected      : Boolean = false;
+    var bluetoothHeadsetConnected   : Boolean   = false
+    var bluetoothA2DPConnected      : Boolean   = false
+    var enumTypeAudio               : TypeAudio = TypeAudio.STANDARD
+
+    enum class TypeAudio {
+        BLUETOOTH,
+        HEADSET,
+        STANDARD,
+        UNDEFINED
+    }
 
     init {
-        audioManager        = context.getSystemService(Context.AUDIO_SERVICE)       as AudioManager
         bluetoothManager    = context.getSystemService(Context.BLUETOOTH_SERVICE)   as BluetoothManager
         sensorManager       = context.getSystemService(Context.SENSOR_SERVICE)      as SensorManager
         proximitySensor     = sensorManager.getDefaultSensor(Sensor.TYPE_PROXIMITY)
         bluetoothAdapter    = bluetoothManager.adapter
 
-        // Set proxy
         bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.HEADSET)
         bluetoothAdapter.getProfileProxy(context, this, BluetoothProfile.A2DP)
-
-        // Set IntentFilter action
         intentFilter.addAction(BluetoothHeadset.ACTION_CONNECTION_STATE_CHANGED)
         intentFilter.addAction(BluetoothHeadset.ACTION_AUDIO_STATE_CHANGED)
         intentFilter.addAction(AudioManager.ACTION_SCO_AUDIO_STATE_UPDATED)
         intentFilter.addAction(TelephonyManager.ACTION_PHONE_STATE_CHANGED)
         intentFilter.addAction(Intent.ACTION_HEADSET_PLUG)
 
-        initVariables()
         initBroadcastReceiver()
-        startOutputAudio()
-
-        // Register broadcast and sensor
         context.registerReceiver(audioBroadcastReceiver, intentFilter)
         sensorManager.registerListener(this, proximitySensor, SensorManager.SENSOR_DELAY_NORMAL)
+        startOutputAudio()
     }
 
     /**
@@ -73,25 +68,15 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
      * Redirect the first exit.
      * @author Daniele Carrozzino
      * */
+    //TODO definire tutte le start
     fun startOutputAudio(){
         if (bluetoothAdapter.isEnabled()) {
-            val headsetConnected : Boolean =
-                bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)    == BluetoothProfile.STATE_CONNECTED
-            val a2dpConnected    : Boolean =
-                bluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP)       == BluetoothProfile.STATE_CONNECTED
-            if(headsetConnected || a2dpConnected){
-                Log.w(TAG, "Bluetooth connected with headset or a2dp")
+            if(bluetoothAdapter.getProfileConnectionState(BluetoothProfile.HEADSET)    == BluetoothProfile.STATE_CONNECTED){
+                enumTypeAudio = TypeAudio.BLUETOOTH
             }
-        }
-    }
-
-    fun initVariables(){
-        // Init variables
-        try {
-            audioMediaPlayerManager = context as AudioMediaPlayerManager
-        }
-        catch (ex : Exception){
-            Log.w(TAG, "AudioMediaPlayerManager not implemented")
+            if(bluetoothAdapter.getProfileConnectionState(BluetoothProfile.A2DP)       == BluetoothProfile.STATE_CONNECTED){
+                enumTypeAudio = TypeAudio.BLUETOOTH
+            }
         }
     }
 
@@ -133,19 +118,23 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     }
 
     fun receivedHeadsetPluggedEvent(headsetPlugged: Boolean){
-        //TODO if headsetPlugged i have to exit my music from the headset
+        if(headsetPlugged)
+            audioMediaPlayerManager.headsetWirePlugged()
+        else
+            audioMediaPlayerManager.headsetWireUnplugged()
     }
 
     fun receivedBluetoothSCOHeadsetEvent(bluetoothHeadsetPlugged: Boolean){
         if(bluetoothHeadsetPlugged){
-            Log.w(TAG, "BluetoothHeadsetPlugged | isConnected = " + bluetoothHeadsetConnected)
-            //Set the output of the audio from the bluetooth
-            //audioManager.
+            audioMediaPlayerManager.headsetBluetoothPlugged()
+        }
+        else{
+            audioMediaPlayerManager.headsetBluetoothUnplugged()
         }
     }
 
     fun receivedBluetoothCSOAudioEvent(){
-        //TODO
+        //TODO da capire quando viene chiamato
     }
 
     fun receivedBluetoothSCOAUdioUpdateEvent(state:Int){
@@ -177,7 +166,6 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
             * di base necessarie per la comunicazione tra il telefono e l'auricolare.
             * */
             BluetoothProfile.HEADSET -> {
-                audioMediaPlayerManager.bluetoothHeadsetEnabled()
                 Log.w(TAG, "HEADSET")
                 bluetoothHeadsetConnected = true;
                 if(proxy?.connectedDevices != null)
@@ -248,6 +236,7 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     override fun onSensorChanged(sensorEvent: SensorEvent?) {
         if(sensorEvent != null && sensorEvent.sensor.type == Sensor.TYPE_PROXIMITY){
             Log.w(TAG, "Value : " + sensorEvent.values[0])
+            audioMediaPlayerManager.sensorChanged(sensorEvent.values[0], enumTypeAudio)
         }
     }
 
@@ -256,9 +245,63 @@ class AudioDevice(var context: Context) : ServiceListener, SensorEventListener {
     }
 
     interface AudioMediaPlayerManager{
-        fun startAudio()
-        fun stopAudio()
-        fun bluetoothHeadsetEnabled()
-        fun bluetoothA2DPEnabled()
+
+        /**
+         * Standard start audio.
+         *
+         * Not other module activated.
+         * Override this method to handle this condition.
+         * */
+        fun standardStartAudio()
+
+        /**
+         * Hadset bluetooth plugged.
+         *
+         * Override this method to handle this condition.
+         * */
+        fun headsetBluetoothPlugged()
+        /**
+         * Headset wire plugged.
+         *
+         * Override this method to handle this condition.
+         * */
+        fun headsetWirePlugged()
+
+        /**
+         * Headset bluetooth unplugged.
+         *
+         * Override this method to handle this condition.
+         * */
+        fun headsetBluetoothUnplugged()
+        /**
+         * Headset wire unplagged.
+         *
+         * Override this method to handle this condition.
+         * */
+        fun headsetWireUnplugged()
+
+        /**
+         * A2DP plugged
+         *
+         * Override this method to handle this condition.
+         * */
+        fun a2dpPlugged()
+        /**
+         * A2DP unplugged
+         *
+         * Override this method to handle this condition.
+         * */
+        fun a2dpUnplugged()
+
+
+        //SENSOR
+        /**
+         * Sensor changed
+         *
+         * Override this method to handle this condition.
+         * This class override the proximity sensor
+         * */
+        fun sensorChanged(valueSensor : Float, typeAudio : TypeAudio)
+
     }
 }
