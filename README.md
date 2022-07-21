@@ -79,7 +79,7 @@ I will not explain too much the hardware part also because it is not my field an
   /**
     * <p>Send data</p>
     * @apiNote
-    * This method is for writing the data on the bluetooth module.
+    * This method is to write the data on the bluetooth module.
     * @params value The value that I want write on the module
     */
   public void sendData(String value) {
@@ -113,7 +113,7 @@ I will not explain too much the hardware part also because it is not my field an
     /**
     * <p>Receive data</p>
     * @apiNote
-    * this method is for reading the data of the bluetooth module.
+    * this method is to read the data of the bluetooth module.
     * No params need.
     */
     public void receivedata() {
